@@ -1,0 +1,90 @@
+/* Общие стили */
+body {
+    background-color: #f8f9fa;
+    color: #495057;
+}
+
+.container {
+    margin-top: 20px;
+}
+
+/* Стили для карточек товаров */
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+    .card:hover {
+        transform: translateY(-5px);
+    }
+
+.card-img-top {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+
+.card-text {
+    color: #6c757d;
+}
+
+.btn-primary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+    .btn-primary:hover {
+        background-color: #495057;
+        border-color: #495057;
+    }
+
+    .btn-primary:active {
+        background-color: #343a40;
+        border-color: #343a40;
+    }
+
+/* Стили для корзины */
+.cart-table {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+    .cart-table th, .cart-table td {
+        vertical-align: middle;
+    }
+
+    .cart-table .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .cart-table .btn-secondary {
+        background-color: #ced4da;
+        border-color: #ced4da;
+        color: #495057;
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+        .cart-table .btn-secondary:hover {
+            background-color: #adb5bd;
+            border-color: #adb5bd;
+        }
+
+        .cart-table .btn-secondary:active {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+
+.cart-total {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #495057;
+}

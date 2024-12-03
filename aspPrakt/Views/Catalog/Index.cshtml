@@ -1,0 +1,57 @@
+﻿@model IEnumerable<aspPrakt.Models.Product>
+@{
+    ViewData["Title"] = "Каталог товаров";
+}
+
+<h2 class="text-center mb-4">Каталог товаров</h2>
+
+<form asp-action="Index" method="get" class="mb-3">
+    <div class="input-group">
+        <input type="text" name="searchString" value="@ViewBag.CurrentSearch" placeholder="Поиск по названию товара" class="form-control" />
+        <div class="input-group-append">
+            <button type="submit" class="btn btn-primary">Поиск</button>
+        </div>
+    </div>
+</form>
+
+<form asp-action="Index" method="get" class="mb-3">
+    <div class="input-group">
+        <select name="categoryId" asp-items="@(new SelectList(ViewBag.Categories, "CategoryId", "CategoryName", ViewBag.CurrentCategory))" class="form-control">
+            <option value="">Все категории</option>
+        </select>
+        <div class="input-group-append">
+            <button type="submit" class="btn btn-primary">Фильтр</button>
+        </div>
+    </div>
+</form>
+
+<p>
+    <a asp-action="Index" asp-route-sortOrder="name_desc">Название &uarr;</a> |
+    <a asp-action="Index" asp-route-sortOrder="price_asc">Цена &darr;</a> |
+    <a asp-action="Index" asp-route-sortOrder="price_desc">Цена &uarr;</a>
+</p>
+
+<div class="row">
+    @if (Model != null && Model.Any())
+    {
+        @foreach (var item in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">@item.ProductName</h5>
+                        <p class="card-text">@String.Format("{0:C}", item.Price)</p>
+                        <p class="card-text">Остаток на складе: @item.StockQuantity</p>
+                        <a asp-action="AddToCart" asp-route-id="@item.ProductId" class="btn btn-primary">Добавить в корзину</a>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="col">
+            <p>Товары не найдены.</p>
+        </div>
+    }
+</div>

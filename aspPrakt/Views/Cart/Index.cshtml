@@ -1,0 +1,55 @@
+﻿@using aspPrakt.Models
+@model IEnumerable<aspPrakt.Models.Product>
+@{
+    ViewData["Title"] = "Корзина";
+}
+
+<h2 class="text-center mb-4">Корзина</h2>
+
+@if (ViewBag.CartItems != null && ((IEnumerable<CartItem>)ViewBag.CartItems).Any())
+{
+    <div class="cart-table">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Название товара</th>
+                    <th>Цена</th>
+                    <th>Количество</th>
+                    <th>Итого</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in (IEnumerable<CartItem>)ViewBag.CartItems)
+                {
+                    <tr>
+                        <td>@item.ProductName</td>
+                        <td>@String.Format("{0:C}", item.Price)</td>
+                        <td>
+                            <form asp-action="DecreaseCartItem" method="post" style="display:inline;">
+                                <input type="hidden" name="id" value="@item.ProductID" />
+                                <button type="submit" class="btn btn-secondary">-</button>
+                            </form>
+                            @item.Quantity
+                            <form asp-action="IncreaseCartItem" method="post" style="display:inline;">
+                                <input type="hidden" name="id" value="@item.ProductID" />
+                                <button type="submit" class="btn btn-secondary">+</button>
+                            </form>
+                        </td>
+                        <td>@String.Format("{0:C}", item.Price * item.Quantity)</td>
+                        <td>
+                            <a asp-action="RemoveFromCart" asp-route-id="@item.ProductID" class="btn btn-danger">Удалить</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <p class="cart-total">Общая сумма: @String.Format("{0:C}", ViewBag.TotalSum)</p>
+    </div>
+}
+else
+{
+    <p>Ваша корзина пуста.</p>
+}
+
+<a asp-controller="Catalog" asp-action="Index" class="btn btn-primary mt-3">Продолжить покупки</a>
