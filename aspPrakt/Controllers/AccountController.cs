@@ -1,5 +1,8 @@
 ﻿using aspPrakt.Models;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
@@ -30,7 +33,20 @@ namespace aspPrakt.Controllers
                 var user = await _context.Clients.SingleOrDefaultAsync(u => u.Email == model.Email);
                 if (user != null && VerifyPasswordHash(model.Password, user.PasswordHash))
                 {
-                    return RedirectToAction("Index", "Home");
+                    var claims = new List<Claim>
+                    {
+                        new Claim(ClaimTypes.Name, user.Login), // Утверждение для имени пользователя
+                        new Claim(ClaimTypes.Email, user.Email), // Утверждение для email
+                        new Claim(ClaimTypes.Role, user.RoleId == 1 ? "Customer" : "OtherRole"), // Утверждение для роли
+                        new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()) // Утверждение для идентификатора пользователя
+                    };
+
+                    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
+
+                    return RedirectToAction("Index", "Home"); // Перенаправляем на главную страницу после входа
                 }
                 ModelState.AddModelError(string.Empty, "Неверный логин или пароль");
             }
@@ -68,7 +84,8 @@ namespace aspPrakt.Controllers
                 {
                     Email = model.Email,
                     Login = model.Login,
-                    RoleId = 1
+                    RoleId = 1,
+                    DateJoined = DateTime.UtcNow // Устанавливаем текущую дату
                 };
                 client.PasswordHash = HashPassword(model.Password);
 
@@ -93,6 +110,13 @@ namespace aspPrakt.Controllers
         {
             var hashedPassword = HashPassword(password);
             return hashedPassword == storedHash;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("Index", "Home");
         }
     }
 }

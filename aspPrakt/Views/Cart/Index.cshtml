@@ -27,18 +27,18 @@
                         <td>@String.Format("{0:C}", item.Price)</td>
                         <td>
                             <form asp-action="DecreaseCartItem" method="post" style="display:inline;">
-                                <input type="hidden" name="id" value="@item.ProductID" />
+                                <input type="hidden" name="id" value="@item.CartItemID" />
                                 <button type="submit" class="btn btn-secondary">-</button>
                             </form>
                             @item.Quantity
                             <form asp-action="IncreaseCartItem" method="post" style="display:inline;">
-                                <input type="hidden" name="id" value="@item.ProductID" />
+                                <input type="hidden" name="id" value="@item.CartItemID" />
                                 <button type="submit" class="btn btn-secondary">+</button>
                             </form>
                         </td>
                         <td>@String.Format("{0:C}", item.Price * item.Quantity)</td>
                         <td>
-                            <a asp-action="RemoveFromCart" asp-route-id="@item.ProductID" class="btn btn-danger">Удалить</a>
+                            <a asp-action="RemoveFromCart" asp-route-id="@item.CartItemID" class="btn btn-danger">Удалить</a>
                         </td>
                     </tr>
                 }

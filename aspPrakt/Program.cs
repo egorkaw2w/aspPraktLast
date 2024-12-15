@@ -1,4 +1,4 @@
-using aspPrakt.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +10,14 @@ builder.Services.AddDbContext<BpnContext>(options =>
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();
 builder.Services.AddLogging();
+
+// Добавляем аутентификацию с использованием куки
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = new PathString("/Account/Login"); // Указываем путь к странице входа
+        options.AccessDeniedPath = new PathString("/Account/AccessDenied"); // Указываем путь к странице доступа запрещён
+    });
 
 var app = builder.Build();
 
@@ -23,11 +31,20 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseSession();
-app.UseRouting();
-app.UseAuthorization();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+// Добавляем маршрутизацию
+app.UseRouting();
+
+// Добавляем middleware для аутентификации и авторизации
+app.UseAuthentication();
+app.UseAuthorization(); // Добавляем middleware для авторизации
+
+// Настраиваем маршруты
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Home}/{action=Index}/{id?}");
+});
 
 app.Run();

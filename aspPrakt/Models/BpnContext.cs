@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using aspPrakt.Models;
 using Microsoft.EntityFrameworkCore;
-
-namespace aspPrakt.Models;
 
 public partial class BpnContext : DbContext
 {
@@ -16,16 +13,12 @@ public partial class BpnContext : DbContext
     }
 
     public virtual DbSet<Category> Categories { get; set; }
-
     public virtual DbSet<Client> Clients { get; set; }
-
     public virtual DbSet<Order> Orders { get; set; }
-
     public virtual DbSet<OrderItem> OrderItems { get; set; }
-
     public virtual DbSet<Product> Products { get; set; }
-
     public virtual DbSet<Role> Roles { get; set; }
+    public virtual DbSet<CartItem> CartItems { get; set; } // Добавляем таблицу для элементов корзины
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
@@ -125,6 +118,26 @@ public partial class BpnContext : DbContext
 
             entity.Property(e => e.RoleId).HasColumnName("RoleID");
             entity.Property(e => e.RoleName).HasMaxLength(50);
+        });
+
+        // Настройка таблицы CartItem
+        modelBuilder.Entity<CartItem>(entity =>
+        {
+            entity.HasKey(e => e.CartItemID);
+
+            entity.Property(e => e.CartItemID).HasColumnName("CartItemID");
+            entity.Property(e => e.ProductID).HasColumnName("ProductID");
+            entity.Property(e => e.ProductName).HasMaxLength(100);
+            entity.Property(e => e.Price).HasColumnType("decimal(10, 2)");
+            entity.Property(e => e.Quantity).HasDefaultValue(1);
+            entity.Property(e => e.UserID).HasColumnName("UserID");
+
+            // Связь с таблицей Client
+            entity.HasOne(d => d.User)
+                .WithMany()
+                .HasForeignKey(d => d.UserID)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK__CartItem__UserID__5CD6CB2B");
         });
 
         OnModelCreatingPartial(modelBuilder);
