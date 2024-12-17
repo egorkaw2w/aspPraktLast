@@ -1,0 +1,47 @@
+﻿@model dynamic
+
+<h2>Удалить запись из таблицы @ViewBag.TableName</h2>
+<p>Вы уверены, что хотите удалить эту запись?</p>
+<form asp-action="DeleteConfirmed" method="post">
+    <input type="hidden" name="tableName" value="@ViewBag.TableName" />
+    <input type="hidden" name="id" value="@GetPrimaryKey(Model)" />
+    <button type="submit" class="btn btn-danger">Удалить</button>
+    <a asp-action="Table" asp-route-tableName="@ViewBag.TableName" class="btn btn-secondary">Отмена</a>
+</form>
+
+@functions {
+    // Функция для определения первичного ключа
+    public object GetPrimaryKey(dynamic item)
+    {
+        var type = item.GetType();
+        if (type == typeof(aspPrakt.Models.Role))
+        {
+            return item.RoleId;
+        }
+        else if (type == typeof(aspPrakt.Models.Client))
+        {
+            return item.UserId;
+        }
+        else if (type == typeof(aspPrakt.Models.Category))
+        {
+            return item.CategoryId;
+        }
+        else if (type == typeof(aspPrakt.Models.Product))
+        {
+            return item.ProductId;
+        }
+        else if (type == typeof(aspPrakt.Models.Order))
+        {
+            return item.OrderId;
+        }
+        else if (type == typeof(aspPrakt.Models.OrderItem))
+        {
+            return item.OrderItemId;
+        }
+        else if (type == typeof(aspPrakt.Models.CartItem))
+        {
+            return item.CartItemId;
+        }
+        return null;
+    }
+}

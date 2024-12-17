@@ -1,0 +1,197 @@
+﻿@model List<dynamic>
+
+<h2>@ViewBag.TableName</h2>
+
+<!-- Кнопка для открытия модального окна добавления записи -->
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addModal">Добавить</button>
+
+<table class="table">
+    <thead>
+        <tr>
+            @foreach (var property in Model.FirstOrDefault()?.GetType().GetProperties() ?? new System.Reflection.PropertyInfo[] { })
+            {
+                <th>@property.Name</th>
+            }
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                @foreach (var property in item.GetType().GetProperties())
+                {
+                    <td>@property.GetValue(item)</td>
+                }
+                <td>
+                    <button type="button" class="btn btn-warning edit-btn" data-toggle="modal" data-target="#editModal" data-id="@GetPrimaryKey(item)">Редактировать</button>
+                    <button type="button" class="btn btn-danger delete-btn" data-id="@GetPrimaryKey(item)">Удалить</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Модальное окно для добавления записи -->
+<div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addModalLabel">Добавить запись</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Форма для добавления записи -->
+                <form id="addForm">
+                    @foreach (var property in Model.FirstOrDefault()?.GetType().GetProperties() ?? new System.Reflection.PropertyInfo[] { })
+                    {
+                        if (!property.Name.EndsWith("Id"))
+                        {
+                            <div class="form-group">
+                                <label for="@property.Name">@property.Name</label>
+                                <input type="text" class="form-control" id="@property.Name" name="@property.Name">
+                            </div>
+                        }
+                    }
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                <button type="button" class="btn btn-primary" id="saveAdd">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для редактирования записи -->
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Редактировать запись</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Форма для редактирования записи -->
+                <form id="editForm">
+                    @foreach (var property in Model.FirstOrDefault()?.GetType().GetProperties() ?? new System.Reflection.PropertyInfo[] { })
+                    {
+                        <div class="form-group">
+                            <label for="@property.Name">@property.Name</label>
+                            <input type="text" class="form-control" id="@property.Name" name="@property.Name">
+                        </div>
+                    }
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                <button type="button" class="btn btn-primary" id="saveEdit">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    // Функция для определения первичного ключа
+    public object GetPrimaryKey(dynamic item)
+    {
+        var type = item.GetType();
+        if (type == typeof(aspPrakt.Models.Role))
+        {
+            return item.RoleId;
+        }
+        else if (type == typeof(aspPrakt.Models.Client))
+        {
+            return item.UserId;
+        }
+        else if (type == typeof(aspPrakt.Models.Category))
+        {
+            return item.CategoryId;
+        }
+        else if (type == typeof(aspPrakt.Models.Product))
+        {
+            return item.ProductId;
+        }
+        else if (type == typeof(aspPrakt.Models.Order))
+        {
+            return item.OrderId;
+        }
+        else if (type == typeof(aspPrakt.Models.OrderItem))
+        {
+            return item.OrderItemId;
+        }
+        else if (type == typeof(aspPrakt.Models.CartItem))
+        {
+            return item.CartItemId;
+        }
+        return null;
+    }
+}
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Обработка кнопки "Сохранить" для добавления записи
+        $('#saveAdd').click(function () {
+            var formData = $('#addForm').serialize();
+            $.ajax({
+                url: '@Url.Action("Add", "Admin")',
+                type: 'POST',
+                data: formData,
+                success: function (response) {
+                    // Закрываем модальное окно
+                    $('#addModal').modal('hide');
+                    // Обновляем таблицу
+                    location.reload();
+                },
+                error: function (error) {
+                    alert('Ошибка при добавлении записи: ' + error.responseText);
+                }
+            });
+        });
+
+        // Обработка кнопки "Сохранить" для редактирования записи
+        $('#saveEdit').click(function () {
+            var formData = $('#editForm').serialize();
+            var id = $('#editForm input[name="UserId"]').val(); // Убедитесь, что имя поля совпадает с первичным ключом
+            $.ajax({
+                url: '@Url.Action("Edit", "Admin")',
+                type: 'POST',
+                data: formData,
+                success: function (response) {
+                    // Закрываем модальное окно
+                    $('#editModal').modal('hide');
+                    // Обновляем таблицу
+                    location.reload();
+                },
+                error: function (error) {
+                    alert('Ошибка при редактировании записи: ' + error.responseText);
+                }
+            });
+        });
+
+        // Загрузка данных для редактирования
+        $('.edit-btn').click(function () {
+            var id = $(this).data('id');
+            $.ajax({
+                url: '@Url.Action("Edit", "Admin")',
+                type: 'GET',
+                data: { id: id },
+                success: function (response) {
+                    // Заполняем форму данными
+                    $('#editForm').html(response);
+                },
+                error: function (error) {
+                    alert('Ошибка при загрузке данных для редактирования: ' + error.responseText);
+                }
+            });
+        });
+    });
+</script>

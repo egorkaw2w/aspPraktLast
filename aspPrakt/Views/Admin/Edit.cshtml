@@ -1,0 +1,20 @@
+﻿@model dynamic
+
+<h2>Редактировать запись в таблице @ViewBag.TableName</h2>
+<form asp-action="Edit" method="post">
+    @if (Model != null)
+    {
+        @foreach (var property in Model.GetType().GetProperties())
+        {
+            <div class="form-group">
+                <label>@property.Name</label>
+                <input name="@property.Name" value="@property.GetValue(Model)" class="form-control" />
+            </div>
+        }
+    }
+    else
+    {
+        <p>Модель не инициализирована. Пожалуйста, вернитесь на предыдущую страницу.</p>
+    }
+    <button type="submit" class="btn btn-primary">Сохранить</button>
+</form>

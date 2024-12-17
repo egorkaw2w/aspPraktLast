@@ -1,0 +1,27 @@
+﻿@model dynamic
+
+<h2>Добавить запись в таблицу @ViewBag.TableName</h2>
+<form asp-action="Add" method="post">
+    @if (Model != null)
+    {
+        @foreach (var property in Model.GetType().GetProperties())
+        {
+            if (property.Name.EndsWith("Id")) // Скрываем поля с ID
+            {
+                <input type="hidden" name="@property.Name" value="@property.GetValue(Model)" />
+            }
+            else
+            {
+                <div class="form-group">
+                    <label>@property.Name</label>
+                    <input name="@property.Name" class="form-control" />
+                </div>
+            }
+        }
+    }
+    else
+    {
+        <p>Модель не инициализирована. Пожалуйста, вернитесь на предыдущую страницу.</p>
+    }
+    <button type="submit" class="btn btn-primary">Добавить</button>
+</form>

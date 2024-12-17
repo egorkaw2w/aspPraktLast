@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+using System.Security.Claims; // Добавленная директива
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
@@ -30,14 +30,18 @@ namespace aspPrakt.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = await _context.Clients.SingleOrDefaultAsync(u => u.Email == model.Email);
+                // Загружаем пользователя вместе с его ролью
+                var user = await _context.Clients
+                    .Include(c => c.Role) // Загружаем роль пользователя
+                    .SingleOrDefaultAsync(u => u.Email == model.Email);
+
                 if (user != null && VerifyPasswordHash(model.Password, user.PasswordHash))
                 {
                     var claims = new List<Claim>
                     {
                         new Claim(ClaimTypes.Name, user.Login), // Утверждение для имени пользователя
                         new Claim(ClaimTypes.Email, user.Email), // Утверждение для email
-                        new Claim(ClaimTypes.Role, user.RoleId == 1 ? "Customer" : "OtherRole"), // Утверждение для роли
+                        new Claim(ClaimTypes.Role, user.Role.RoleName), // Утверждение для роли
                         new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()) // Утверждение для идентификатора пользователя
                     };
 
@@ -46,7 +50,15 @@ namespace aspPrakt.Controllers
 
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
 
-                    return RedirectToAction("Index", "Home"); // Перенаправляем на главную страницу после входа
+                    // Перенаправляем на разные страницы в зависимости от роли
+                    if (user.Role.RoleName == "Admin")
+                    {
+                        return RedirectToAction("Index", "Admin"); // Перенаправляем на страницу администратора
+                    }
+                    else
+                    {
+                        return RedirectToAction("Index", "Home"); // Перенаправляем на главную страницу для обычных пользователей
+                    }
                 }
                 ModelState.AddModelError(string.Empty, "Неверный логин или пароль");
             }
@@ -84,7 +96,7 @@ namespace aspPrakt.Controllers
                 {
                     Email = model.Email,
                     Login = model.Login,
-                    RoleId = 1,
+                    RoleId = 1, // По умолчанию роль "Customer"
                     DateJoined = DateTime.UtcNow // Устанавливаем текущую дату
                 };
                 client.PasswordHash = HashPassword(model.Password);

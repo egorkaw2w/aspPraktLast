@@ -1,0 +1,11 @@
+﻿@model List<string>
+
+<h2>Список таблиц</h2>
+<ul>
+    @foreach (var tableName in Model)
+    {
+        <li>
+            <a asp-action="Table" asp-route-tableName="@tableName">@tableName</a>
+        </li>
+    }
+</ul>
