@@ -24,6 +24,7 @@ CREATE TABLE Categories (
     Description NVARCHAR(255)
 );
 
+
 CREATE TABLE Products (
     ProductID INT PRIMARY KEY IDENTITY,
     CategoryID INT FOREIGN KEY REFERENCES Categories(CategoryID),
@@ -49,11 +50,24 @@ CREATE TABLE OrderItems (
     ItemPrice DECIMAL(10, 2) NOT NULL
 );
 
+CREATE TABLE CartItems (
+    CartItemID INT PRIMARY KEY IDENTITY, -- Уникальный идентификатор элемента корзины
+    ProductID INT NOT NULL, -- Идентификатор продукта
+    ProductName NVARCHAR(100) NOT NULL, -- Название продукта
+    Price DECIMAL(10, 2) NOT NULL, -- Цена продукта
+    Quantity INT DEFAULT 1, -- Количество продукта
+    UserID INT NOT NULL, -- Идентификатор пользователя, которому принадлежит элемент корзины
+    FOREIGN KEY (UserID) REFERENCES Client(UserID) ON DELETE CASCADE, -- Связь с таблицей Client
+    FOREIGN KEY (ProductID) REFERENCES Products(ProductID) ON DELETE CASCADE -- Связь с таблицей Products
+);
+
+
 INSERT INTO Roles (RoleName) VALUES 
 ('Customer'), 
 ('Admin');
 
 INSERT INTO Client (Login, PasswordHash, Email, RoleID) VALUES
+('vaska','pmWkWSBCL51Bfkhn79xPuKBKHz//H6B+mY6G9/eieuM=','v@s',2),
 ('catlover1', 'hashed_password1', 'catlover1@example.com', 1),
 ('admin', 'hashed_password2', 'admin@example.com', 2);
 
@@ -81,4 +95,7 @@ SELECT * FROM Categories;
 SELECT * FROM Products;
 SELECT * FROM Orders;
 SELECT * FROM OrderItems;
+SELECT * FROM CartItems;
 
+
+SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'CartItems';
